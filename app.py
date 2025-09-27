@@ -21,9 +21,7 @@ if not OPENAI_API_KEY:
 
 # Simple authentication - you can modify these credentials
 VALID_USERS = {
-    "admin": "password123",        # Change this username/password
-    "baco": "handbook2024",        # Add more users as needed
-    "employee": "welcome123"       # Example additional user
+    "test": "test123"        # Updated credentials for deployment
 }
 
 def hash_password(password):
@@ -67,16 +65,6 @@ def check_password():
                 # Show attempt counter
                 if st.session_state.login_attempts >= 3:
                     st.error("🚨 Too many failed attempts. Please contact administrator.")
-                    st.info("**Valid test credentials:** admin / password123")
-    
-    # Show help information
-    st.info("""
-    **For Demo/Testing:**
-    - Username: `admin`
-    - Password: `password123`
-    
-    **For Production:** Change credentials in the code before deployment.
-    """)
     
     return False
 

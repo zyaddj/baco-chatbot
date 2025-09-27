@@ -84,7 +84,7 @@ def ask(q: Question):
         "   - Use clear headings with ** for important sections\n"
         "   - Keep sentences concise and well-structured\n"
         "- If the answer isn't in the context, say you don't know and suggest they refer to the handbook\n"
-        "- If you can give an answer but it's not completely clear, express appropriate uncertainty\n\n"
+        "- I need you to assess if you have answered the question explicitly. If you are no able to, express appropriate uncertainty\n\n"
         f"Context:\n{context}\n\n"
         f"Question: {q.query}\n\n"
         "Provide a well-formatted answer with brief summary first, then details:"

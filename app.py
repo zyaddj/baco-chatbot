@@ -15,9 +15,13 @@ load_dotenv()
 
 # Configuration
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+FAISS_INDEX_PATH = os.getenv("FAISS_INDEX_PATH", "faiss_index")  # Private index path
+
 if not OPENAI_API_KEY:
     st.error("❌ OpenAI API key not found. Please check your environment variables.")
     st.stop()
+
+print(f"🔍 Using private FAISS index: {FAISS_INDEX_PATH}")
 
 # Simple authentication - you can modify these credentials
 VALID_USERS = {
@@ -77,8 +81,13 @@ def load_vector_database():
             model="text-embedding-3-small"
         )
         
-        # Load the FAISS index
-        db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
+        # Load the FAISS index from private location
+        if not os.path.exists(FAISS_INDEX_PATH):
+            st.error(f"❌ FAISS index not found at {FAISS_INDEX_PATH}")
+            st.error("Please run the ingestion script first to process your documents.")
+            return None
+            
+        db = FAISS.load_local(FAISS_INDEX_PATH, embeddings, allow_dangerous_deserialization=True)
         return db
     except Exception as e:
         st.error(f"❌ Could not load vector database: {e}")

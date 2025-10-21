@@ -2,3 +2,22 @@ venv/
 __pycache__/
 .env
 .DS_Store
+
+# Private/Sensitive Documents
+data/
+private_data/
+documents/
+*.pdf
+*.docx
+*.doc
+
+# Client-specific data (for multi-tenant setup)
+client_data/
+faiss_index/
+*.faiss
+*.pkl
+
+# Logs and temporary files
+logs/
+temp/
+cache/

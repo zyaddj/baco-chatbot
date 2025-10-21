@@ -19,20 +19,26 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 if not OPENAI_API_KEY:
     raise ValueError("Set OPENAI_API_KEY in your .env file")  # Stop if no API key
 
+# Get private paths from environment
+FAISS_INDEX_PATH = os.getenv("FAISS_INDEX_PATH", "faiss_index")  # Private index path
+
 # Create FastAPI application - this becomes your web server
 app = FastAPI(title="Baco MVP Backend")
 
 # 1) Load the vector database that was created by ingest.py
-print("Loading FAISS vector database...")  # Show loading progress
+print(f"Loading FAISS vector database from {FAISS_INDEX_PATH}...")  # Show loading progress
 embeddings = OpenAIEmbeddings(
     openai_api_key=OPENAI_API_KEY,
     model="text-embedding-3-small"  # Same model used in ingestion
 )
 
-# Load the saved FAISS index from disk
+# Load the saved FAISS index from private location
 # allow_dangerous_deserialization=True is required because FAISS uses pickle (security warning)
-# This is safe in your local environment since you created the index yourself
-db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
+# This is safe in your environment since you created the index yourself
+if not os.path.exists(FAISS_INDEX_PATH):
+    raise FileNotFoundError(f"FAISS index not found at {FAISS_INDEX_PATH}. Run ingest.py first.")
+
+db = FAISS.load_local(FAISS_INDEX_PATH, embeddings, allow_dangerous_deserialization=True)
 print("✅ Vector database loaded successfully!")
 
 # Define the data structure for incoming questions

@@ -11,12 +11,18 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter  # Breaks tex
 from langchain_community.vectorstores import FAISS       # Vector database to store embeddings
 from langchain_openai import OpenAIEmbeddings  # Converts text to numerical vectors
 
-# 1) Load OpenAI API key from .env file
+# 1) Load OpenAI API key and private paths from .env file
 # This is crucial - without the API key, we can't create embeddings
 load_dotenv()  # Reads the .env file and loads variables into environment
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")  # Gets the API key from environment
+DOCUMENTS_PATH = os.getenv("DOCUMENTS_PATH", "data")  # Private documents path
+FAISS_INDEX_PATH = os.getenv("FAISS_INDEX_PATH", "faiss_index")  # Private index path
+
 if not OPENAI_API_KEY:
     raise ValueError("Set OPENAI_API_KEY in your .env file")  # Stops if no key found
+
+print(f"📁 Using private documents path: {DOCUMENTS_PATH}")
+print(f"🔍 Using private index path: {FAISS_INDEX_PATH}")
 
 # 2) Read all PDF files from the ./data folder
 def read_pdfs(folder: str) -> list[tuple[str, str]]:
@@ -60,10 +66,10 @@ def chunk_text(source_name: str, text: str, chunk_chars: int = 1200, overlap: in
     return chunks, metadatas
 
 def main():
-    # Step 1: Read all PDFs from data folder
-    pdfs = read_pdfs("data")
+    # Step 1: Read all PDFs from private documents folder
+    pdfs = read_pdfs(DOCUMENTS_PATH)
     if not pdfs:
-        raise RuntimeError("No PDFs found in ./data. Add files like handbook.pdf, policies.pdf")
+        raise RuntimeError(f"No PDFs found in {DOCUMENTS_PATH}. Add files like handbook.pdf, policies.pdf")
 
     # Step 2: Set up OpenAI embeddings
     # Embeddings convert text into numerical vectors that capture meaning
@@ -91,10 +97,11 @@ def main():
     # FAISS is a fast similarity search library created by Facebook
     vs = FAISS.from_texts(all_texts, embedding=embeddings, metadatas=all_meta)
 
-    # Step 5: Save the vector database to disk
-    # This creates a folder called "faiss_index" with the searchable database
-    vs.save_local("faiss_index")
-    print("✅ Done. FAISS index saved to ./faiss_index")
+    # Step 5: Save the vector database to private location
+    # Create directory if it doesn't exist
+    os.makedirs(os.path.dirname(FAISS_INDEX_PATH), exist_ok=True)
+    vs.save_local(FAISS_INDEX_PATH)
+    print(f"✅ Done. FAISS index saved to {FAISS_INDEX_PATH}")
     print("Your PDFs are now searchable! Run the chatbot app next.")
 
 if __name__ == "__main__":
